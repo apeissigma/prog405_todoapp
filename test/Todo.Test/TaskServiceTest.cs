@@ -1,4 +1,6 @@
-﻿using ToDo.Common.Models;
+﻿using System.Threading.Tasks;
+using ToDo.Common.Models;
+using ToDo.Common.Requests;
 using ToDo.Common.Services;
 
 namespace Todo.Test;
@@ -11,10 +13,27 @@ public class ClassServiceTest
         this.service = new DummyFileDataService();
     }
 
+    //Test for a normal task with all parameters
     [Fact]
-    public void CreateTaskSucceeds()
+    public async Task CreateTaskSucceeds()
     {
         var taskService = new TaskService(this.service);
+
+        var happyRequest = new CreateTaskRequest("Test Task", "Dummy desc", DateTime.UtcNow.AddDays(3));
+
+        var createTaskResult = await taskService.CreateTaskAsync(happyRequest);
+
+        Assert.True(createTaskResult.IsOk());
+    }
+
+    //Test for a task with no description
+    [Fact]
+    public async Task CreateTaskNoDescSucceeds()
+    {
+        var taskService = new TaskService(this.service);
+        var request = new CreateTaskRequest("Test Task 2", DateTime.UtcNow.AddDays(5));
+        var createTaskResult = await taskService.CreateTaskAsync(request);
+        Assert.True(createTaskResult.IsOk());
     }
 }
 

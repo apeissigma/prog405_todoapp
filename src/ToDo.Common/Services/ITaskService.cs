@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ToDo.Common.Models;
 using ToDo.Common.Requests;
 
 namespace ToDo.Common.Services
@@ -11,7 +12,7 @@ namespace ToDo.Common.Services
     //async not needed in interface
     public interface ITaskService
     {
-        Task CreateTaskAsync(CreateTaskRequest request);
+        Task<Result> CreateTaskAsync(CreateTaskRequest request);
     }
 
     //color with async
@@ -25,10 +26,18 @@ namespace ToDo.Common.Services
             this.fileDataService = fileDataService; 
         }
 
-        public async Task CreateTaskAsync(CreateTaskRequest request)
+        public async Task<Result> CreateTaskAsync(CreateTaskRequest request)
         {
             //must be here to compile
-            await Task.CompletedTask; 
+            //request -> map to model
+            var modelResult = TaskModel.CreateTask(request);
+
+            if (modelResult.IsErr())
+            {
+                return Result.Err(modelResult.GetErr()); 
+            }
+            await this.fileDataService.SaveAsync(modelResult.GetVal());
+            return Result.Ok(); 
         }
     }
 }
