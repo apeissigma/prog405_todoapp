@@ -17,12 +17,14 @@ public class ClassServiceTest
     [Fact]
     public async Task CreateTaskSucceeds()
     {
+        //arrange
         var taskService = new TaskService(this.service);
-
         var happyRequest = new CreateTaskRequest("Test Task", "Dummy desc", DateTime.UtcNow.AddDays(3));
 
+        //act
         var createTaskResult = await taskService.CreateTaskAsync(happyRequest);
 
+        //assert
         Assert.True(createTaskResult.IsOk());
     }
 
@@ -30,12 +32,18 @@ public class ClassServiceTest
     [Fact]
     public async Task CreateTaskNoDescSucceeds()
     {
+        //arrange
         var taskService = new TaskService(this.service);
         var request = new CreateTaskRequest("Test Task 2", DateTime.UtcNow.AddDays(5));
+
+        //act
         var createTaskResult = await taskService.CreateTaskAsync(request);
+
+        //assert
         Assert.True(createTaskResult.IsOk());
     }
 
+    //test error in creating task
     [Fact]
     public async Task CreateTask_DoesNotSucceed()
     {
@@ -56,7 +64,7 @@ public class ClassServiceTest
         Assert.True(createTaskResult.IsErr());
     }
 
-    
+    //tests SaveAsync 
     [Fact]
     public async Task CreateTask_CallSaveAsync()
     {
@@ -77,6 +85,7 @@ public class ClassServiceTest
         Assert.True(createTaskResult.IsOk());
     }
 
+    //tests GetAsync for the same key
     [Fact]
     public async Task CreateTask_GetAsync()
     {
