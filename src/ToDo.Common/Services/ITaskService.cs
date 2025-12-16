@@ -26,7 +26,7 @@ namespace ToDo.Common.Services
             this.fileDataService = fileDataService; 
         }
 
-        public async Task<Result<string>> CreateTaskAsync(CreateTaskRequest request)
+        public async Task<Result> CreateTaskAsync(CreateTaskRequest request)
         {
             //must be here to compile
             //request -> map to model
@@ -34,18 +34,19 @@ namespace ToDo.Common.Services
 
             if (modelResult.IsErr())
             {
-                return Result<string>.Err(modelResult.GetErr()); 
+                return Result.Err(modelResult.GetErr()); 
             }
+
             var model = modelResult.GetVal(); 
             if (model is null)
             {
-                return Result<string>.Err("Not found");
+                return Result.Err("Not found");
             }
 
             await this.fileDataService.SaveAsync(modelResult.GetVal());
 
             //return key
-            return Result<string>.Ok(model.Key); 
+            return Result.Ok(); 
         }
     }
 }

@@ -8,7 +8,7 @@ using ToDo.Common.Services;
 
 namespace ToDo.Common.Models
 {
-    public class TaskModel : IFileDataService
+    public class TaskModel //: IFileDataService
     {
         private TaskModel()
         {

@@ -37,28 +37,76 @@ public class ClassServiceTest
     }
 
     [Fact]
-    public async Task CallAsyncTest()
+    public async Task CreateTask_DoesNotSucceed()
     {
-        //TODO: Call SaveAsync on IFileDataService
+        //arrange
+        var dummyService = new DummyFileDataService();
+        var taskService = new TaskService(dummyService);
 
-        var taskService = new TaskService(this.service);
-        var request = new CreateTaskRequest("Test Task", "Description", DateTime.UtcNow.AddDays(7));
+        var badRequest = new CreateTaskRequest(
+            name: "test name",
+            description: "test desc",
+            dueDate: DateTime.UtcNow.AddDays(-1) //this should fail
+        );
+
+        //act
+        var createTaskResult = await taskService.CreateTaskAsync(badRequest);
+
+        //assert
+        Assert.True(createTaskResult.IsErr());
+    }
+
+    
+    [Fact]
+    public async Task CreateTask_CallSaveAsync()
+    {
+        //arrange
+        var dummyService = new DummyFileDataService();
+        var taskService = new TaskService(dummyService);
+        var request = new CreateTaskRequest(
+            name: "test name",
+            description: "test desc",
+            dueDate: DateTime.UtcNow.AddDays(7)
+        );
+
+        //act
         var createTaskResult = await taskService.CreateTaskAsync(request);
 
-        service.SaveAsync(createTaskResult); 
+        //assert
+        //SaveAsync was called if the test passes because the model creation succeeds
+        Assert.True(createTaskResult.IsOk());
     }
 
     [Fact]
-    public async Task GetAsyncTest()
+    public async Task CreateTask_GetAsync()
     {
-        //TODO: Verify That GetAsync for the Same Key returns the Created Task File
-        var taskService = new TaskService(this.service);
-        var request = new CreateTaskRequest("Test Task", "Description", DateTime.UtcNow.AddDays(7));
-        var createTaskResult = await taskService.CreateTaskAsync(request);
-        var task = Ok(createTaskResult);
-        service.GetAsync(task);    
-    }
+        //arrange
+        var dummyService = new DummyFileDataService();
+        var taskService = new TaskService(dummyService);
+        var request = new CreateTaskRequest(
+            name: "test name",
+            description: "test desc",
+            dueDate: DateTime.UtcNow.AddDays(7)
+        );
+        
+        //act
+        var modelResult = TaskModel.CreateTask(request);
+        Assert.True(modelResult.IsOk());
 
+        var originalTask = modelResult.GetVal();
+        Assert.NotNull(originalTask);
+
+        var taskKey = originalTask.Key;
+
+        await dummyService.SaveAsync(originalTask); //save
+        
+        var retrievedTask = await dummyService.GetAsync(taskKey); //use GetAsync with the key
+
+        //assert
+        Assert.NotNull(retrievedTask);
+        Assert.Equal(taskKey, retrievedTask.Key); 
+    }
+    
 }
 
 internal class DummyFileDataService : IFileDataService
@@ -77,7 +125,6 @@ internal class DummyFileDataService : IFileDataService
             this.data.Add(t.Key, t);
         }
     }
-
 
     public async Task<TaskModel?> GetAsync(string key)
     {
@@ -101,10 +148,12 @@ internal class DummyFileDataService : IFileDataService
         {
             return;
         }
+
         if (data.ContainsKey(obj.Key))
         {
             data.Remove(obj.Key);
         }
+
         this.data.Add(obj.Key, obj);
     }
 }
