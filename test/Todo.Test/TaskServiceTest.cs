@@ -35,6 +35,30 @@ public class ClassServiceTest
         var createTaskResult = await taskService.CreateTaskAsync(request);
         Assert.True(createTaskResult.IsOk());
     }
+
+    [Fact]
+    public async Task CallAsyncTest()
+    {
+        //TODO: Call SaveAsync on IFileDataService
+
+        var taskService = new TaskService(this.service);
+        var request = new CreateTaskRequest("Test Task", "Description", DateTime.UtcNow.AddDays(7));
+        var createTaskResult = await taskService.CreateTaskAsync(request);
+
+        service.SaveAsync(createTaskResult); 
+    }
+
+    [Fact]
+    public async Task GetAsyncTest()
+    {
+        //TODO: Verify That GetAsync for the Same Key returns the Created Task File
+        var taskService = new TaskService(this.service);
+        var request = new CreateTaskRequest("Test Task", "Description", DateTime.UtcNow.AddDays(7));
+        var createTaskResult = await taskService.CreateTaskAsync(request);
+        var task = Ok(createTaskResult);
+        service.GetAsync(task);    
+    }
+
 }
 
 internal class DummyFileDataService : IFileDataService

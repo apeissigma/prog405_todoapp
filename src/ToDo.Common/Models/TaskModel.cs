@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ToDo.Common.Requests;
+using ToDo.Common.Services;
 
 namespace ToDo.Common.Models
 {
-    public class TaskModel
+    public class TaskModel : IFileDataService
     {
         private TaskModel()
         {
@@ -43,5 +44,6 @@ namespace ToDo.Common.Models
                 DueDate = request.DueDate
             });
         }
+
     }
 }
